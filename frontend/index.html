@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Researcho | Deep Technical Intelligence Agent</title>
+    <meta name="description"
+        content="Enterprise-grade technical research agent with persistent memory and cost-aware execution." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* - Reset & Base ------------------------------ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(99, 102, 241, 0.5);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-deep: #818cf8;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --text: #e2e8f0;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --font: 'Inter', sans-serif;
+            --mono: 'JetBrains Mono', monospace;
+            --transition: 0.2s ease;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
+        }
+
+        /* - Scrollbar ------------------------------- */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        /* - Header --------------------------------- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+
+        .header-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.85);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+        }
+
+        .container--header {
+            max-width: 860px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .app-logo__icon {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+        }
+
+        .app-logo__name {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-deep), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-logo__badge {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .app-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-nav__link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color var(--transition);
+        }
+
+        .app-nav__link:hover {
+            color: var(--text);
+        }
+
+        .icon-button {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition);
+        }
+
+        .icon-button:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* - Main ---------------------------------- */
+        .app-stage {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* - Mode Toggle ------------------------------ */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+        }
+
+        .mode-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) + 4px);
+            padding: 6px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .mode-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 13px;
+            transition: all var(--transition);
+            text-align: left;
+        }
+
+        .mode-card:hover {
+            background: var(--bg-card-hover);
+            color: var(--text);
+        }
+
+        .mode-card.is-active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(129, 140, 248, 0.15));
+            border: 1px solid var(--border-active);
+            color: var(--text);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .mode-card__icon {
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .mode-card.is-active .mode-card__icon {
+            color: var(--accent-deep);
+        }
+
+        .mode-card__label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .mode-card__meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        /* - Query Card ------------------------------- */
+        .search-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .search-card:focus-within {
+            border-color: var(--border-active);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .search-card__textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 15px;
+            padding: 20px;
+            resize: none;
+            line-height: 1.65;
+        }
+
+        .search-card__textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-card__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .search-card__tips {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tip-icon {
+            color: var(--yellow);
+            display: flex;
+            align-items: center;
+        }
+
+        .btn--primary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn--primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px var(--accent-glow);
+        }
+
+        .btn--primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* - Clarification Panel -------------------------- */
+        .clarification-card {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .clarification-card__header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .clarification-card__header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .clarification-card__icon {
+            color: var(--yellow);
+            display: flex;
+            align-items: center;
+        }
+
+        .clarification-card__text {
+            color: var(--text-dim);
+            font-size: 15px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .clarification-card__actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-field {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 14px;
+            padding: 10px 14px;
+            outline: none;
+            width: 100%;
+        }
+
+        .input-field:focus {
+            border-color: var(--border-active);
+        }
+
+        .btn--secondary {
+            padding: 10px 20px;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: var(--radius-sm);
+            color: var(--yellow);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+
+        .btn--secondary:hover {
+            background: rgba(245, 158, 11, 0.3);
+        }
+
+        /* - Loading -------------------------------- */
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+        }
+
+        .process-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+            transition: color var(--transition);
+        }
+
+        .process-step.is-active {
+            color: var(--text);
+        }
+
+        .process-step.done {
+            color: var(--green);
+        }
+
+        .process-step__indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border);
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+
+        .process-step.is-active .process-step__indicator {
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+            animation: pulse 1.2s infinite;
+        }
+
+        .process-step.done .process-step__indicator {
+            background: var(--green);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.4);
+                opacity: 0.7;
+            }
+        }
+
+        .progress-track {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-track__fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--green));
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+
+        /* - Metrics Bar ------------------------------ */
+        .analytics-ribbon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .analytic-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: var(--mono);
+            white-space: nowrap;
+        }
+
+        #metricMode {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+            color: var(--accent-deep);
+            font-weight: 600;
+        }
+
+        .analytic-item--confidence {
+            padding: 5px 12px;
+        }
+
+        .analytic-item__label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font);
+        }
+
+        .confidence-meter {
+            width: 60px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .confidence-meter__fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--red), var(--yellow), var(--green));
+            border-radius: 2px;
+            transition: width 0.6s ease;
+        }
+
+        .analytic-item__value {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* - Report Card ------------------------------- */
+        .report-view {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .report-view__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .report-view__title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .btn--small {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: var(--font);
+        }
+
+        .btn--small:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        /* - Markdown Body ------------------------------ */
+        .report-view__content {
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--text);
+        }
+
+        .markdown-body h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--accent-deep);
+            margin: 28px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .markdown-body h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        .markdown-body p {
+            margin-bottom: 12px;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .markdown-body li {
+            margin-bottom: 6px;
+        }
+
+        .markdown-body code {
+            font-family: var(--mono);
+            font-size: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--accent-deep);
+        }
+
+        .markdown-body pre {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .markdown-body th {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .markdown-body td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .markdown-body blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* - Error Panel ------------------------------- */
+        .error-card {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: var(--radius);
+            padding: 28px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .error-card__icon {
+            color: var(--red);
+            display: flex;
+            align-items: center;
+        }
+
+        .error-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* - Utilities & Buttons ---------------------------- */
+        .action-footer {
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn--outline {
+            padding: 12px 28px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 24px;
+            color: var(--accent-deep);
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn--outline:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn--full {
+            width: 100%;
+            padding: 11px;
+        }
+
+        .is-hidden {
+            display: none !important;
+        }
+
+        /* - Modal ---------------------------------- */
+        .modal-dialog {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            border: none;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .modal-dialog__content {
+            background: #13131a;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            animation: slideUp 0.2s ease;
+            margin: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-dialog__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-dialog__header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .modal-dialog__close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all var(--transition);
+        }
+
+        .modal-dialog__close:hover {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        .modal-dialog__body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+        }
+
+        .checkbox-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .modal-dialog__footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="container container--header">
+            <div class="app-logo" onclick="location.reload()" role="button" aria-label="Home">
+                <span class="app-logo__icon"><i data-lucide="microscope" size="26"></i></span>
+                <div class="app-logo__content">
+                    <span class="app-logo__name">Researcho</span>
+                    <span class="app-logo__badge">v1.0-alpha</span>
+                </div>
+            </div>
+
+            <nav class="app-nav">
+                <a href="/docs" target="_blank" class="app-nav__link">Documentation</a>
+                <button class="icon-button" id="settingsTrigger" aria-label="Settings" onclick="openSettings()">
+                    <span class="icon-button__symbol"><i data-lucide="settings" size="18"></i></span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="app-stage">
+        <div class="mode-selector">
+            <div class="mode-group" role="radiogroup" aria-label="Research Depth">
+                <button class="mode-card is-active" id="btnQuickMode" data-mode="quick" role="radio"
+                    aria-checked="true">
+                    <span class="mode-card__icon"><i data-lucide="zap" size="20"></i></span>
+                    <div class="mode-card__info">
+                        <div class="mode-card__label">Quick Mode</div>
+                        <div class="mode-card__meta">Under 30s</div>
+                    </div>
+                </button>
+
+                <button class="mode-card" id="btnDeepMode" data-mode="deep" role="radio" aria-checked="false">
+                    <span class="mode-card__icon"><i data-lucide="brain-circuit" size="20"></i></span>
+                    <div class="mode-card__info">
+                        <div class="mode-card__label">Deep Analysis</div>
+                        <div class="mode-card__meta">Up to 3 mins</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <section class="search-section" id="querySection">
+            <div class="search-card">
+                <textarea id="queryInput" class="search-card__textarea"
+                    placeholder="Describe your technical challenge (e.g., 'Optimize Raft consensus for high-latency networks')..."
+                    rows="4"></textarea>
+
+                <div class="search-card__footer">
+                    <div class="search-card__tips">
+                        <span class="tip-icon"><i data-lucide="lightbulb" size="16"></i></span>
+                        <span class="tip-text">Best for architecture, benchmarks, and engineering trade-offs.</span>
+                    </div>
+                    <button class="btn btn--primary" id="researchBtn" onclick="submitQuery()">
+                        <span class="btn__text">Initiate Research</span>
+                        <span class="btn__icon"><i data-lucide="arrow-right" size="18"></i></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="clarification-overlay is-hidden" id="clarificationPanel">
+            <div class="clarification-card">
+                <header class="clarification-card__header">
+                    <span class="clarification-card__icon"><i data-lucide="help-circle" size="20"></i></span>
+                    <h3>Parameter Clarification</h3>
+                </header>
+                <p class="clarification-card__text" id="clarificationText"></p>
+                <div class="clarification-card__actions">
+                    <input type="text" id="clarificationInput" class="input-field" placeholder="Provide context..." />
+                    <button class="btn btn--secondary" onclick="submitClarification()">Proceed</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="status-overlay is-hidden" id="loadingPanel">
+            <div class="status-card">
+                <div class="process-steps" id="loadingSteps">
+                    <div class="process-step is-active" id="step-routing">
+                        <div class="process-step__indicator"></div>
+                        <span class="process-step__label">Routing Query</span>
+                    </div>
+                    <div class="process-step" id="step-planning">
+                        <div class="process-step__indicator"></div>
+                        <span class="process-step__label">Strategic Planning</span>
+                    </div>
+                    <div class="process-step" id="step-retrieving">
+                        <div class="process-step__indicator"></div>
+                        <span class="process-step__label">Knowledge Extraction</span>
+                    </div>
+                    <div class="process-step" id="step-reasoning">
+                        <div class="process-step__indicator"></div>
+                        <span class="process-step__label">Heuristic Reasoning</span>
+                    </div>
+                    <div class="process-step" id="step-synthesizing">
+                        <div class="process-step__indicator"></div>
+                        <span class="process-step__label">Synthesizing Report</span>
+                    </div>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-track__fill" id="loadingBarFill"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="output-container is-hidden" id="resultPanel">
+            <div class="analytics-ribbon" id="metricsBar">
+                <div class="analytic-item" id="metricMode">
+                    <i data-lucide="zap" size="14"></i> Quick
+                </div>
+                <div class="analytic-item" id="metricLatency">
+                    <i data-lucide="clock" size="14"></i> <span>0s</span>
+                </div>
+                <div class="analytic-item" id="metricTokens">
+                    <i data-lucide="hash" size="14"></i> <span>0 tkn</span>
+                </div>
+                <div class="analytic-item" id="metricCost">
+                    <i data-lucide="coins" size="14"></i> <span>$0.00</span>
+                </div>
+
+                <div class="analytic-item analytic-item--confidence">
+                    <span class="analytic-item__label">Confidence</span>
+                    <div class="confidence-meter">
+                        <div class="confidence-meter__fill" id="confidenceFill"></div>
+                    </div>
+                    <span class="analytic-item__value" id="confidenceValue">0%</span>
+                </div>
+            </div>
+
+            <article class="report-view" id="reportCard">
+                <header class="report-view__header">
+                    <h2 class="report-view__title" id="reportTitle">Synthesis Report</h2>
+                    <button class="btn btn--small" onclick="copyReport()">
+                        <i data-lucide="clipboard" size="14"></i> Copy Markdown
+                    </button>
+                </header>
+                <div class="report-view__content markdown-body" id="reportBody"></div>
+            </article>
+
+            <div class="action-footer">
+                <button class="btn btn--outline" onclick="newQuery()">+ New Research Query</button>
+            </div>
+        </section>
+
+        <section class="error-view is-hidden" id="errorPanel">
+            <div class="error-card">
+                <span class="error-card__icon"><i data-lucide="alert-triangle" size="28"></i></span>
+                <p class="error-card__message" id="errorText">Critical system interruption.</p>
+                <button class="btn btn--primary" onclick="newQuery()">Retry Execution</button>
+            </div>
+        </section>
+
+    </main>
+
+    <dialog class="modal-dialog is-hidden" id="settingsModal">
+        <div class="modal-dialog__content">
+            <header class="modal-dialog__header">
+                <h3>Execution Preferences</h3>
+                <button class="modal-dialog__close" onclick="closeSettings()" aria-label="Close">
+                    <i data-lucide="x" size="18"></i>
+                </button>
+            </header>
+
+            <div class="modal-dialog__body">
+                <div class="form-group">
+                    <label class="form-label" for="userIdInput">System Identity (User ID)</label>
+                    <input type="text" id="userIdInput" class="input-field" value="anonymous" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="expertiseSelect">Output Verbosity / Level</label>
+                    <select id="expertiseSelect" class="input-field">
+                        <option value="beginner">Foundational</option>
+                        <option value="intermediate" selected>Engineering Professional</option>
+                        <option value="advanced">Domain Expert / Research Scientist</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="lengthSelect">Response Length</label>
+                    <select id="lengthSelect" class="input-field">
+                        <option value="short">Concise Summary</option>
+                        <option value="detailed" selected>Comprehensive Report</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label checkbox-label">
+                        <input type="checkbox" id="codeExamplesCheck" checked />
+                        <span class="checkbox-text">Prioritize technical implementation details (Code)</span>
+                    </label>
+                </div>
+            </div>
+
+            <footer class="modal-dialog__footer">
+                <button class="btn btn--primary btn--full" onclick="savePreferences()">Apply Configuration</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <script>
+        // Initialize standard icons
+        lucide.createIcons();
+
+        const API_BASE = "http://localhost:8000";
+
+        // - State ---------------------------------
+        let currentMode = "quick";
+        let currentUserId = "anonymous";
+        let pendingQuery = null;
+
+        // - Preferences (localStorage) -----------------------
+        function getPrefs() { return JSON.parse(localStorage.getItem("researcho_prefs") || "{}"); }
+        function setPrefs(p) { localStorage.setItem("researcho_prefs", JSON.stringify(p)); }
+
+        (function restoreState() {
+            const prefs = getPrefs();
+            if (prefs.userId) {
+                currentUserId = prefs.userId;
+                document.getElementById("userIdInput").value = currentUserId;
+            }
+            if (prefs.expertise_level) document.getElementById("expertiseSelect").value = prefs.expertise_level;
+            if (prefs.preferred_answer_length) document.getElementById("lengthSelect").value = prefs.preferred_answer_length;
+            if (prefs.prefers_code_examples !== undefined) document.getElementById("codeExamplesCheck").checked = prefs.prefers_code_examples;
+        })();
+
+        // - Mode Toggle ------------------------------
+        document.querySelectorAll(".mode-card").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".mode-card").forEach(b => b.classList.remove("is-active"));
+                btn.classList.add("is-active");
+                currentMode = btn.dataset.mode;
+            });
+        });
+
+        document.getElementById("queryInput").addEventListener("keydown", e => {
+            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault(); submitQuery();
+            }
+        });
+
+        // -- Real Backend API Call --
+        async function executeResearch(payload) {
+            const btn = document.getElementById("researchBtn");
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/research`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.detail || `Server error: ${res.status}`);
+                }
+
+                const data = await res.json();
+                hideLoading();
+
+                if (data.needs_clarification && data.clarification_question) {
+                    showClarification(data.clarification_question);
+                } else if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResult(data);
+                }
+            } catch (err) {
+                hideLoading();
+                showError(err.message || "Could not reach the backend. Make sure server is running on port 8000.");
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function submitQuery() {
+            const query = document.getElementById("queryInput").value.trim();
+            if (!query) return;
+            pendingQuery = query;
+            showLoading();
+            startLoadingAnimation();
+            await executeResearch({ query, mode: currentMode, user_id: currentUserId });
+        }
+
+        async function submitClarification() {
+            const answer = document.getElementById("clarificationInput").value.trim();
+            if (!answer) return;
+            hide("clarificationPanel");
+            showLoading();
+            startLoadingAnimation();
+            await executeResearch({ query: pendingQuery, mode: "deep", user_id: currentUserId, clarification_answer: answer });
+        }
+
+        // - UI Panels -------------------------------
+        function showLoading() {
+            hide("querySection"); hide("clarificationPanel"); hide("resultPanel"); hide("errorPanel");
+            show("loadingPanel");
+        }
+        function hideLoading() { hide("loadingPanel"); }
+
+        function showResult(data) {
+            document.getElementById("metricMode").innerHTML = data.mode === "deep" ? '<i data-lucide="brain-circuit" size="14"></i> Deep' : '<i data-lucide="zap" size="14"></i> Quick';
+            document.querySelector("#metricLatency span").textContent = `${data.latency}s`;
+            document.querySelector("#metricTokens span").textContent = `${(data.input_tokens + data.output_tokens).toLocaleString()} tkn`;
+            document.querySelector("#metricCost span").textContent = `$${data.estimated_cost.toFixed(6)}`;
+
+            const pct = Math.round(data.confidence * 100);
+            document.getElementById("confidenceValue").textContent = `${pct}%`;
+            document.getElementById("confidenceFill").style.width = `${pct}%`;
+            document.getElementById("confidenceValue").style.color = pct >= 70 ? "var(--green)" : pct >= 40 ? "var(--yellow)" : "var(--red)";
+
+            document.getElementById("reportTitle").textContent = `Research Report - ${data.mode === "deep" ? "Deep" : "Quick"} Mode`;
+            document.getElementById("reportBody").innerHTML = marked.parse(data.report || "_No report generated._");
+
+            lucide.createIcons(); // Re-render icons inside injected HTML
+            show("resultPanel");
+        }
+
+        function showError(msg) {
+            document.getElementById("errorText").textContent = msg;
+            show("errorPanel"); show("querySection");
+        }
+
+        function showClarification(question) {
+            document.getElementById("clarificationText").textContent = question;
+            hide("loadingPanel"); hide("querySection");
+            show("clarificationPanel");
+        }
+
+        function newQuery() {
+            hide("resultPanel"); hide("errorPanel"); hide("clarificationPanel"); show("querySection");
+            document.getElementById("queryInput").value = "";
+            document.getElementById("queryInput").focus();
+            resetLoadingSteps();
+        }
+
+        // - Loading Animation ---------------------------
+        const STEPS = ["step-routing", "step-planning", "step-retrieving", "step-reasoning", "step-synthesizing"];
+        const STEP_DURATIONS_QUICK = [500, 0, 1000, 0, 1500];
+        const STEP_DURATIONS_DEEP = [500, 1500, 2000, 2000, 2000];
+        let loadingTimer = null;
+
+        function startLoadingAnimation() {
+            resetLoadingSteps();
+            const durations = currentMode === "deep" ? STEP_DURATIONS_DEEP : STEP_DURATIONS_QUICK;
+            const fill = document.getElementById("loadingBarFill");
+
+            if (currentMode === "quick") {
+                ["step-planning", "step-reasoning"].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.classList.remove("is-active"); el.classList.add("done");
+                });
+            }
+
+            const activeSteps = currentMode === "quick" ? ["step-routing", "step-retrieving", "step-synthesizing"] : STEPS;
+            let idx = 0;
+
+            function advance() {
+                if (idx >= activeSteps.length) return;
+                const stepId = activeSteps[idx];
+                if (idx > 0) {
+                    document.getElementById(activeSteps[idx - 1]).classList.remove("is-active");
+                    document.getElementById(activeSteps[idx - 1]).classList.add("done");
+                }
+                document.getElementById(stepId).classList.add("is-active");
+                fill.style.width = `${Math.round(((idx + 1) / activeSteps.length) * 90)}%`;
+                idx++;
+                const dur = durations[STEPS.indexOf(stepId)] || 2000;
+                if (dur > 0) loadingTimer = setTimeout(advance, dur);
+            }
+            advance();
+        }
+
+        function resetLoadingSteps() {
+            if (loadingTimer) { clearTimeout(loadingTimer); loadingTimer = null; }
+            STEPS.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove("is-active", "done");
+            });
+            document.getElementById("loadingBarFill").style.width = "0%";
+        }
+
+        // - Settings Modal -----------------------------
+        function openSettings() { document.getElementById("settingsModal").classList.remove("is-hidden"); }
+        function closeSettings() { document.getElementById("settingsModal").classList.add("is-hidden"); }
+
+        document.getElementById("settingsModal").addEventListener("click", e => {
+            if (e.target.id === "settingsModal") closeSettings();
+        });
+
+        async function savePreferences() {
+            const userId = document.getElementById("userIdInput").value.trim() || "anonymous";
+            const prefs = {
+                userId,
+                expertise_level: document.getElementById("expertiseSelect").value,
+                preferred_answer_length: document.getElementById("lengthSelect").value,
+                prefers_code_examples: document.getElementById("codeExamplesCheck").checked,
+            };
+            setPrefs(prefs);
+            currentUserId = userId;
+
+            // Sync with backend
+            try {
+                await fetch(`${API_BASE}/preferences/${userId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(prefs)
+                });
+            } catch (e) { console.warn("Failed to sync preferences:", e); }
+
+            closeSettings();
+        }
+
+        async function copyReport() {
+            const text = document.getElementById("reportBody").innerText;
+            try {
+                await navigator.clipboard.writeText(text);
+                alert("Copied to clipboard!");
+            } catch { }
+        }
+
+        function show(id) { document.getElementById(id).classList.remove("is-hidden"); }
+        function hide(id) { document.getElementById(id).classList.add("is-hidden"); }
+    </script>
+</body>
+
+</html>

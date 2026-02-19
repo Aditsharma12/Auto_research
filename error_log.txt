@@ -1,0 +1,12 @@
+Graph created OK
+error: None
+Traceback (most recent call last):
+  File "C:\Users\adit1\OneDrive\Desktop\E_com_ai\researcho\test_graph2.py", line 16, in <module>
+    log.write(f"report: {str(result.get('report',''))[:500]}\n")
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\adit1\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f50d' in position 11: character maps to <undefined>
+
+FULL ERROR: 'charmap' codec can't encode character '\U0001f50d' in position 11: character maps to <undefined>
