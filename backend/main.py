@@ -12,7 +12,7 @@ Endpoints:
 
 import time
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional, List, Literal
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,6 +69,7 @@ class ResearchResponse(BaseModel):
     output_tokens: int = 0
     estimated_cost: float = 0.0
     latency: float = 0.0
+    web_sources: List[str] = []
     error: Optional[str] = None
 
 
@@ -173,6 +174,7 @@ async def research(request: ResearchRequest):
         output_tokens=final_state.get("output_tokens", 0),
         estimated_cost=final_state.get("estimated_cost", 0.0),
         latency=latency,
+        web_sources=final_state.get("web_sources", []),
         error=final_state.get("error"),
     )
 
@@ -304,6 +306,7 @@ async def analyze_product(request: ProductAnalyzeRequest):
         output_tokens=final_state.get("output_tokens", 0),
         estimated_cost=final_state.get("estimated_cost", 0.0),
         latency=latency,
+        web_sources=final_state.get("web_sources", []),
         error=final_state.get("error"),
     )
 

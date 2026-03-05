@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_API_KEY: str = ""
 
+    # ── Web Search & Scraping ────────────────────────────────────────────────
+    WEB_SEARCH_ENABLED: bool = True
+    WEB_SEARCH_MAX_RESULTS: int = 5
+    WEB_SCRAPE_MAX_CHARS: int = 3000
+
     # ── App ──────────────────────────────────────────────────────────────────
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000

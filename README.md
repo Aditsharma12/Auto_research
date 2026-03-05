@@ -11,9 +11,12 @@ Built with FastAPI · LangGraph · Qdrant · Google Gemini API · sentence-trans
 | Feature | Description |
 |---|---|
 | 🛒 **E-Commerce Intelligence** | **Review Analysis:** Extract structured complaints & sentiment.<br>**Gap Analysis:** Identify competitor weaknesses.<br>**Margin Optimization:** Focus research on profitability. |
+| 🌐 **Autonomous Search** | DuckDuckGo web search integration (no API key needed) |
+| 🕷️ **Web Scraping** | Live extraction of web page content via `newspaper3k` & `bs4` |
+| 📚 **Auto-Indexing** | Scraped text is automatically chunked and indexed into Qdrant |
 | ⚡ **Quick Mode** | Focused answer in ~5–15 seconds |
-| 🔬 **Deep Mode** | Multi-step plan → retrieve → reason → analyze reviews → structured report |
-| 🧠 **Persistent Memory** | Research history & user preferences (Qdrant) |
+| 🔬 **Deep Mode** | Search → Scrape → Index → Retrieve → Reason → Analyze |
+| 🧠 **Persistent Memory** | Research history, documents, & user preferences (Qdrant) |
 | 📊 **Confidence Scoring** | Multi-factor score based on sources & similarity |
 | 💰 **Cost Tracking** | Token usage tracking (free tier = $0.00) |
 | 🤔 **Clarification Loop** | Asks one question when the query is ambiguous |
@@ -104,13 +107,19 @@ graph TD
         Orchestrator --> Mode{Mode Router}
         
         %% Quick Path
-        Mode -- Quick --> R_Quick[Retriever Quick]
+        Mode -- Quick --> WebSearchQ[Web Search Quick]
+        WebSearchQ --> WebScraperQ[Web Scraper Quick]
+        WebScraperQ --> AutoIndexerQ[Auto Indexer Quick]
+        AutoIndexerQ --> R_Quick[Retriever Quick]
         R_Quick --> S_Quick[Synthesis Quick]
         
         %% Deep Path
         Mode -- Deep --> Clarification[Clarification Node]
         Clarification --> Planner[Planner Node]
-        Planner --> Retriever[Retriever Node]
+        Planner --> WebSearchD[Web Search Deep]
+        WebSearchD --> WebScraperD[Web Scraper Deep]
+        WebScraperD --> AutoIndexerD[Auto Indexer Deep]
+        AutoIndexerD --> Retriever[Retriever Node]
         
         %% Parallel Execution
         Retriever --> Reasoning[Reasoning Node]
@@ -138,6 +147,9 @@ sequenceDiagram
     participant F as Frontend
     participant O as Orchestrator
     participant P as Planner
+    participant WS as Web Search
+    participant SC as Web Scraper
+    participant AI as Auto Indexer
     participant R as Retriever
     participant A as Agent (Reasoning/Review)
     participant S as Synthesis
@@ -152,7 +164,10 @@ sequenceDiagram
         F->>O: Submit Answer
     end
     O->>P: Decompose Query
-    P->>R: Retrieve Documents
+    P->>WS: Search Web (DuckDuckGo)
+    WS->>SC: Scrape URLs
+    SC->>AI: Chunk & Auto-Index
+    AI->>R: Retrieve Documents & Fresh Web Data
     par Parallel Analysis
         R->>A: Reason over chunks
         R->>A: Analyze Reviews
@@ -191,13 +206,15 @@ curl -X POST http://localhost:8000/research \
 
 ## 📦 Adding Documents to the Knowledge Base
 
-To analyze specific products or reviews, index them first:
+To manually analyze specific products or reviews, index them first:
 
 ```bash
 curl -X POST http://localhost:8000/documents/index \
   -H "Content-Type: application/json" \
   -d '{"text": "Customer Review: The battery life is terrible...", "source": "product_reviews.csv", "metadata": {"type": "reviews"}}'
 ```
+
+*Note: Web Search results are now automatically chunked and indexed without needing manual calls.*
 
 ---
 
@@ -212,10 +229,15 @@ researcho/
 │   │   ├── orchestrator.py   # LangGraph definition
 │   │   ├── state.py          # Shared state (incl. E-commerce fields)
 │   │   └── nodes/            
-│   │       ├── review_analyzer.py  # [NEW] Structured review analysis
+│   │       ├── web_search.py       # [NEW] DuckDuckGo search integration
+│   │       ├── web_scraper.py      # [NEW] Live page extraction
+│   │       ├── auto_indexer.py     # [NEW] Auto-indexing pipeline
+│   │       ├── review_analyzer.py  # Structured review analysis
 │   │       ├── reasoning.py        # Deep reasoning loop
 │   │       └── ...
 │   ├── memory/               # Qdrant integration
+│   │   ├── chunker.py        # [NEW] Text chunking utility
+│   │   └── ...
 │   ├── llm/                  # Gemini provider
 │   └── prompts/              # System prompts
 ├── frontend/

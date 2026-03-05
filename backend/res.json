@@ -1,0 +1,14 @@
+{
+  "query": "apple",
+  "mode": "quick",
+  "report": "## Error\nQuick synthesis failed: Error calling model 'gemini-1.5-flash' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}",
+  "needs_clarification": false,
+  "clarification_question": null,
+  "confidence": 0.3,
+  "input_tokens": 1,
+  "output_tokens": 86,
+  "estimated_cost": 0.0,
+  "latency": 1.4,
+  "web_sources": [],
+  "error": "Error calling model 'gemini-1.5-flash' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}"
+}

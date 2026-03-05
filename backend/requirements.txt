@@ -16,6 +16,13 @@ langchain-huggingface>=0.0.3        # HuggingFace embeddings wrapper
 # ── Qdrant ───────────────────────────────────────────────────────────────────
 qdrant-client>=1.9.0
 
+# ── Web Search & Scraping ────────────────────────────────────────────────────
+ddgs>=7.0.0             # Free web search, no API key
+beautifulsoup4>=4.12.0               # HTML parsing fallback
+newspaper3k>=0.2.8                   # Article extraction
+httpx>=0.27.0                        # Async HTTP client
+lxml_html_clean>=0.4.1               # lxml cleaner for newspaper3k
+
 # ── Configuration ────────────────────────────────────────────────────────────
 pydantic>=2.0.0
 pydantic-settings>=2.0.0

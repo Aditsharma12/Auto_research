@@ -26,6 +26,11 @@ class ResearchState(TypedDict, total=False):
     retrieved_chunks: List[dict]        # list of {text, source, score}
     past_research: List[dict]           # relevant past research from memory
 
+    # ── Web Search & Scraping ────────────────────────────────────
+    search_results: List[dict]          # raw search results [{title, url, snippet}]
+    scraped_content: List[dict]         # scraped pages [{url, text}]
+    web_sources: List[str]              # list of source URLs used
+
     # ── Reasoning ────────────────────────────────────────────────
     reasoning_notes: str                # intermediate reasoning trace
     review_analysis: Optional[str]      # structured review analysis from dedicated node

@@ -165,6 +165,24 @@ function showResult(data) {
   document.getElementById("reportBody").innerHTML =
     marked.parse(data.report || "_No report generated._");
 
+  // Web Sources
+  const sourcesContainer = document.getElementById("webSourcesPanel");
+  if (sourcesContainer) {
+    if (data.web_sources && data.web_sources.length > 0) {
+      let html = '<div class="web-sources"><h3>🌐 Web Sources Used</h3><ul>';
+      data.web_sources.forEach((url, i) => {
+        const domain = new URL(url).hostname.replace("www.", "");
+        html += `<li><a href="${url}" target="_blank" rel="noopener">${domain}</a></li>`;
+      });
+      html += '</ul></div>';
+      sourcesContainer.innerHTML = html;
+      sourcesContainer.classList.remove("hidden");
+    } else {
+      sourcesContainer.innerHTML = '';
+      sourcesContainer.classList.add("hidden");
+    }
+  }
+
   show("resultPanel");
   document.getElementById("resultPanel").scrollIntoView({ behavior: "smooth" });
 }

@@ -22,6 +22,9 @@ def mode_router_node(state: ResearchState) -> ResearchState:
     state.setdefault("clarification_question", None)
     state.setdefault("clarification_answer", None)
     state.setdefault("error", None)
+    state.setdefault("search_results", [])
+    state.setdefault("scraped_content", [])
+    state.setdefault("web_sources", [])
 
     return state
 
